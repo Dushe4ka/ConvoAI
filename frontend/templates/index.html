@@ -12,10 +12,23 @@
         <header>
             <h1>🧠 ConvoAI</h1>
         </header>
+
+        <!-- Добавленные кнопки -->
+        <div class="chat-controls">
+            <button id="newChatBtn">Новый чат</button>
+            <button id="clearChatBtn">Очистить историю</button>
+        </div>
+
         <div id="chat-box"></div>
+
         <div class="input-area">
             <input type="text" id="user-input" placeholder="Введите сообщение..." autocomplete="off">
             <button id="send-btn">➤</button>
+        </div>
+
+        <div class="file-upload-area">
+            <input type="file" id="file-input">
+            <button id="upload-btn">📂 Загрузить</button>
         </div>
     </div>
 </body>
