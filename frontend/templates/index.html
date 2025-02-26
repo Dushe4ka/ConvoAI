@@ -3,33 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConvoAI - Чат с ИИ</title>
+    <title>AI Chat</title>
     <link rel="stylesheet" href="/static/styles.css">
-    <script defer src="/static/script.js"></script>
 </head>
 <body>
     <div class="chat-container">
         <header>
-            <h1>🧠 ConvoAI</h1>
+            <h1>AI Chat</h1>
         </header>
 
-        <!-- Добавленные кнопки -->
-        <div class="chat-controls">
-            <button id="newChatBtn">Новый чат</button>
-            <button id="clearChatBtn">Очистить историю</button>
+        <div id="chat-history" class="chat-history"></div>
+
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Напишите сообщение..." />
+            <button id="send-button">Отправить</button>
         </div>
 
-        <div id="chat-box"></div>
+        <button id="clear-chat-button" class="clear-button">Очистить историю чата</button>
 
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Введите сообщение..." autocomplete="off">
-            <button id="send-btn">➤</button>
-        </div>
-
-        <div class="file-upload-area">
-            <input type="file" id="file-input">
-            <button id="upload-btn">📂 Загрузить</button>
+        <div class="file-upload-container">
+            <label for="file-upload" class="file-upload-label">Загрузить файл</label>
+            <input type="file" id="file-upload" class="file-upload-input" />
+            <button id="upload-button">Загрузить</button>
         </div>
     </div>
+
+    <script src="/static/script.js"></script>
 </body>
 </html>

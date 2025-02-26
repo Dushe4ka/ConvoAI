@@ -1,0 +1,41 @@
+from fastapi import UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
+import os
+import fitz  # PyMuPDF
+from docx import Document
+import uuid
+import logging
+
+from qdrant_db import qdrant_client, collection_name, embed_model
+
+# --- Настройки ---
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+logger = logging.getLogger(__name__)
+
+# --- Обработчик загрузки файла ---
+async def upload_file(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+    try:
+        with open(file_path, "wb") as buffer:
+            buffer.write(await file.read())
+
+        text = ""
+        if file.filename.endswith(".pdf"):
+            pdf_document = fitz.open(file_path)
+            text = "\n".join([page.get_text() for page in pdf_document])
+            pdf_document.close()
+        elif file.filename.endswith((".doc", ".docx")):
+            doc = Document(file_path)
+            text = "\n".join([p.text for p in doc.paragraphs])
+        else:
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read()
+
+        embedding = embed_model.embed_query(text)
+        qdrant_client.upsert(collection_name=collection_name, points=[{"id": str(uuid.uuid4()), "vector": embedding, "payload": {"text": text}}])
+        return JSONResponse(content={"message": "Файл успешно загружен и обработан."})
+    except Exception as e:
+        logger.error(f"Ошибка обработки файла: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка обработки файла")

@@ -1,146 +1,118 @@
-const chatBox = document.getElementById("chat-box");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-const fileInput = document.getElementById("file-input");
-const uploadBtn = document.getElementById("upload-btn");
-const newChatBtn = document.getElementById("newChatBtn"); // Кнопка "Новый чат"
-const clearChatBtn = document.getElementById("clearChatBtn"); // Кнопка "Очистить историю"
-
-// Генерация session_id (если нет в localStorage)
+// Получение session_id из localStorage или генерация нового
 let sessionId = localStorage.getItem("session_id") || generateSessionId();
 localStorage.setItem("session_id", sessionId);
 
-// Функция генерации нового session_id
+document.addEventListener("DOMContentLoaded", () => {
+    if (!sessionId) {
+        alert("Не удалось найти идентификатор сессии.");
+        return;
+    }
+
+    document.getElementById("send-button").addEventListener("click", sendMessage);
+    document.getElementById("clear-chat-button").addEventListener("click", clearChatHistory);
+    document.getElementById("upload-button").addEventListener("click", uploadFile);
+    document.getElementById("user-input").addEventListener("keydown", handleEnterKey);
+
+    loadChatHistory(); // Загрузка истории при открытии страницы
+});
+
+// Генерация нового session_id
 function generateSessionId() {
     return Math.random().toString(36).substr(2, 9);
 }
 
-// Функция отправки сообщения
+// Отправка сообщения
 async function sendMessage() {
-    const message = userInput.value.trim();
-    if (!message) return;
+    const userInput = document.getElementById("user-input").value.trim();
+    if (userInput === "") return;
 
-    addMessage(message, "user-message");
-    userInput.value = "";
-
-    addMessage("...", "ai-message", true);
+    const chatHistory = document.getElementById("chat-history");
+    chatHistory.innerHTML += `<div class="user"><strong>Вы:</strong> ${userInput}</div>`;
+    document.getElementById("user-input").value = "";
 
     try {
         const response = await fetch("/chat", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ session_id: sessionId, message }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                session_id: sessionId,
+                message: userInput,
+            }),
         });
 
         const data = await response.json();
-        removeLoading();
-        addMessage(data.response, "ai-message");
+        chatHistory.innerHTML += `<div class="ai"><strong>ИИ:</strong> ${data.response}</div>`;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
     } catch (error) {
         console.error("Ошибка:", error);
-        removeLoading();
-        addMessage("Ошибка сервера 😢", "ai-message");
+        chatHistory.innerHTML += `<div class="ai error"><strong>Ошибка:</strong> Не удалось получить ответ.</div>`;
     }
 }
 
-// Функция добавления сообщений
-function addMessage(text, className, isLoading = false) {
-    const msg = document.createElement("div");
-    msg.classList.add("message", className);
-    if (isLoading) msg.classList.add("loading");
-    msg.innerHTML = text;
-    chatBox.appendChild(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
+// Обработчик Enter
+function handleEnterKey(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
 }
 
-// Удаление "..."
-function removeLoading() {
-    const loading = document.querySelector(".loading");
-    if (loading) loading.remove();
+// Очистка истории чата
+async function clearChatHistory() {
+    if (!confirm("Вы уверены, что хотите очистить историю чата?")) return;
+
+    try {
+        const response = await fetch(`/clear_chat/${sessionId}`, { method: "DELETE" });
+        const data = await response.json();
+        alert(data.message);
+        document.getElementById("chat-history").innerHTML = "";
+    } catch (error) {
+        console.error("Ошибка очистки чата:", error);
+        alert("Ошибка при очистке истории чата.");
+    }
 }
 
-// Кнопка "Отправить"
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
-
-// Загрузка истории сообщений
+// Загрузка истории чата при открытии страницы
 async function loadChatHistory() {
     try {
         const response = await fetch(`/history/${sessionId}`);
         const history = await response.json();
+
+        const chatHistory = document.getElementById("chat-history");
         history.forEach(msg => {
-            addMessage(msg.message, msg.role === "user" ? "user-message" : "ai-message");
+            chatHistory.innerHTML += `<div class="${msg.role === "user" ? "user" : "ai"}">
+                <strong>${msg.role === "user" ? "Вы" : "ИИ"}:</strong> ${msg.message}
+            </div>`;
         });
+        chatHistory.scrollTop = chatHistory.scrollHeight;
     } catch (error) {
         console.error("Ошибка загрузки истории:", error);
     }
 }
 
-window.onload = loadChatHistory;
+// Загрузка файла
+async function uploadFile() {
+    const fileInput = document.getElementById("file-upload");
+    const file = fileInput.files[0];
+    if (!file) return;
 
-// Функция загрузки файла
-uploadBtn.addEventListener("click", async () => {
-    if (fileInput.files.length === 0) {
-        alert("Выберите файл перед загрузкой.");
-        return;
-    }
-
-    let formData = new FormData();
-    formData.append("file", fileInput.files[0]);
-
-    addMessage("Загрузка файла...", "ai-message", true);
-    uploadBtn.disabled = true;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("session_id", sessionId);
 
     try {
-        let response = await fetch("/upload_file", {
+        const response = await fetch("/upload_file/", {
             method: "POST",
-            body: formData
+            body: formData,
         });
 
-        let result = await response.json();
-        removeLoading();
-        alert(result.message);
-        addMessage("Файл успешно загружен! ✅", "ai-message");
-    } catch (error) {
-        removeLoading();
-        alert("Ошибка загрузки файла.");
-        console.error("Ошибка:", error);
-        addMessage("Ошибка загрузки файла ❌", "ai-message");
-    }
-
-    uploadBtn.disabled = false;
-});
-
-// --- Кнопка "Очистить историю" ---
-clearChatBtn.addEventListener("click", async () => {
-    if (!confirm("Вы действительно хотите очистить историю чата?")) return;
-
-    try {
-        await fetch(`/chat/${sessionId}`, { method: "DELETE" }); // Исправленный эндпоинт
-        chatBox.innerHTML = ""; // Очистка визуального интерфейса
-        alert("История чата очищена!");
-    } catch (error) {
-        console.error("Ошибка очистки истории:", error);
-        alert("Ошибка при очистке истории.");
-    }
-});
-
-// --- Кнопка "Новый чат" ---
-newChatBtn.addEventListener("click", async () => {
-    if (!confirm("Вы действительно хотите создать новый чат?")) return;
-
-    try {
-        const response = await fetch("/new_chat"); // Исправленный эндпоинт
         const data = await response.json();
-
-        sessionId = data.session_id;
-        localStorage.setItem("session_id", sessionId);
-        chatBox.innerHTML = ""; // Очистка чата в интерфейсе
-
-        alert(`Создан новый чат (ID: ${sessionId})`);
+        alert(data.message);
+        fileInput.value = "";
     } catch (error) {
-        console.error("Ошибка создания нового чата:", error);
-        alert("Ошибка при создании нового чата.");
+        console.error("Ошибка загрузки файла:", error);
+        alert("Ошибка при загрузке файла.");
     }
-});
+}
