@@ -6,12 +6,27 @@ from docx import Document
 import uuid
 import logging
 
-from qdrant_db import qdrant_client, collection_name, embed_model
+from qdrant_db import qdrant_client, collection_name
+from chat_AI import embed_model
 
 # --- Настройки ---
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 logger = logging.getLogger(__name__)
+
+
+# --- Разбиение текста на чанки ---
+def split_text(text, chunk_size=512, overlap=50):
+    """Разбивает текст на перекрывающиеся чанки."""
+    words = text.split()
+    chunks = []
+
+    for i in range(0, len(words), chunk_size - overlap):
+        chunk = " ".join(words[i:i + chunk_size])
+        chunks.append(chunk)
+
+    return chunks
+
 
 # --- Обработчик загрузки файла ---
 async def upload_file(file: UploadFile = File(...)):
@@ -33,9 +48,23 @@ async def upload_file(file: UploadFile = File(...)):
             with open(file_path, "r", encoding="utf-8") as f:
                 text = f.read()
 
-        embedding = embed_model.embed_query(text)
-        qdrant_client.upsert(collection_name=collection_name, points=[{"id": str(uuid.uuid4()), "vector": embedding, "payload": {"text": text}}])
-        return JSONResponse(content={"message": "Файл успешно загружен и обработан."})
+        # Разбиваем текст на чанки
+        chunks = split_text(text)
+
+        # Вставляем чанки в Qdrant
+        points = []
+        for chunk in chunks:
+            embedding = embed_model.embed_query(chunk)  # Используем LLaMA 3.2
+            points.append({
+                "id": str(uuid.uuid4()),
+                "vector": embedding,
+                "payload": {"text": chunk}
+            })
+
+        qdrant_client.upsert(collection_name=collection_name, points=points)
+
+        return JSONResponse(content={"message": f"Файл загружен, сохранено {len(chunks)} чанков."})
+
     except Exception as e:
         logger.error(f"Ошибка обработки файла: {e}")
         raise HTTPException(status_code=500, detail="Ошибка обработки файла")
