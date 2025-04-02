@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Knowledge Base</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-robot"></i> AI Knowledge Base</h1>
+            <div class="upload-section">
+                <input type="file" id="file-upload" accept=".pdf,.doc,.docx,.txt" multiple>
+                <button id="upload-btn"><i class="fas fa-upload"></i> Загрузить файлы</button>
+                <div id="upload-status"></div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="chat-list">
+                    <button id="new-chat-btn"><i class="fas fa-plus"></i> Новый чат</button>
+                    <ul id="chat-sessions"></ul>
+                </div>
+                <div class="category-filter">
+                    <h3><i class="fas fa-filter"></i> Фильтры</h3>
+                    <div class="filter-group">
+                        <label for="category-select">Категория:</label>
+                        <select id="category-select"></select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="date-from">Дата от:</label>
+                        <input type="date" id="date-from">
+                    </div>
+                    <div class="filter-group">
+                        <label for="date-to">Дата до:</label>
+                        <input type="date" id="date-to">
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <textarea id="user-input" placeholder="Введите ваш вопрос..."></textarea>
+                    <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

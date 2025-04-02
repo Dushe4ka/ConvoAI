@@ -15,6 +15,7 @@ import uuid
 # --- Настройки ---
 logger = logging.getLogger(__name__)
 llm = OllamaLLM(model="llama3.2")
+vision_model = OllamaLLM(model="llama3.2-vision")
 embed_model = OllamaEmbeddings(model="llama3.2")
 ai_memories = {}
 
@@ -142,7 +143,7 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
         # 4️⃣ Генерация финального ответа
         ai_response = await generate_rag_response(user_message, search_results, memory)
 
-        logger.info(f"Ключевые слова: {keywords}")
+        # logger.info(f"Ключевые слова: {keywords}")
         logger.info(f"Вектор запроса: {query_embedding}")
         logger.info(f"Результаты поиска: {search_results}")
 

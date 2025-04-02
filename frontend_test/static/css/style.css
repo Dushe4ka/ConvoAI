@@ -1,0 +1,61 @@
+/* Общие стили */
+body {
+    padding-top: 1rem; /* Небольшой отступ сверху */
+}
+
+/* Стили для сообщений об ошибках */
+.error-message {
+    color: var(--pico-color-red-500); /* Используем переменные Pico */
+    font-size: 0.9em;
+    margin-top: 0.5rem;
+}
+
+/* Стили чата */
+.chat-history {
+    height: 400px; /* Или другая высота */
+    overflow-y: auto;
+    border: 1px solid var(--pico-form-element-border-color);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--pico-border-radius);
+}
+
+.chat-message {
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--pico-border-radius);
+    max-width: 80%;
+}
+
+.chat-message.user {
+    background-color: var(--pico-primary-background);
+    color: var(--pico-primary-inverse);
+    margin-left: auto; /* Выравнивание справа */
+    text-align: right;
+}
+
+.chat-message.bot {
+    background-color: var(--pico-secondary-background);
+    color: var(--pico-secondary-inverse);
+    margin-right: auto; /* Выравнивание слева */
+    text-align: left;
+}
+
+.chat-message strong { /* Имя пользователя/бота */
+     display: block;
+     font-size: 0.8em;
+     margin-bottom: 0.2em;
+     opacity: 0.7;
+ }
+
+/* Скрытие/отображение секций */
+/* Класс hidden можно добавлять/убирать через JS */
+.hidden {
+    display: none;
+}
+
+/* Стиль для таблицы пользователей */
+#user-list-table button {
+    padding: 0.2rem 0.5rem; /* Уменьшаем кнопки в таблице */
+    font-size: 0.8em;
+}
