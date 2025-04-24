@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI База Знаний</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.10/purify.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h2>Чаты</h2>
+                <button id="create-chat-btn" title="Создать новый чат">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <ul id="chat-list">
+                <li class="loading-chats">Загрузка чатов...</li>
+            </ul>
+        </aside>
+
+        <main id="chat-area">
+             <div id="chat-header">
+                <h3 id="current-chat-name">Выберите чат</h3>
+                <button id="clear-history-btn" title="Очистить историю текущего чата" style="display: none;">
+                    <i class="fas fa-eraser"></i>
+                </button>
+            </div>
+            <div id="chat-messages">
+                <div class="message system">Добро пожаловать! Выберите чат слева или создайте новый.</div>
+            </div>
+
+            <div id="input-area">
+                 <div id="upload-indicator" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Загрузка...
+                 </div>
+                 <div id="typing-indicator" style="display: none;">
+                    <i class="fas fa-spinner fa-pulse"></i> AI думает...
+                 </div>
+
+                 <button id="upload-btn" title="Загрузить файлы или изображения">
+                     <i class="fas fa-paperclip"></i>
+                 </button>
+
+                <input type="file" id="file-input" multiple hidden
+                       accept=".pdf,.docx,.txt,image/png,image/jpeg,image/webp,image/gif">
+                <textarea id="message-input" placeholder="Введите ваше сообщение..." rows="1"></textarea>
+                <button id="send-btn" title="Отправить сообщение">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/script.js" defer></script>
+</body>
+</html>
